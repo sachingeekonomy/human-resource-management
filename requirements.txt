@@ -3,7 +3,7 @@ gunicorn
 psycopg2-binary
 whitenoise
 xhtml2pdf
-dj-database-urlHistory
+dj-database-url
 
 
 
