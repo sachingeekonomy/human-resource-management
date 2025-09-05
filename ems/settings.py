@@ -73,6 +73,7 @@ if 'DATABASE_URL' in os.environ:
     DATABASES = {
         'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
+    print(f"Using PostgreSQL database: {os.environ.get('DATABASE_URL')}")
 else:
     # For build time, use SQLite to avoid connection errors
     DATABASES = {
@@ -81,6 +82,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("Using SQLite database")
 
 # Disable migrations during build if no DATABASE_URL
 if 'DATABASE_URL' not in os.environ:
