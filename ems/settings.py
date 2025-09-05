@@ -74,6 +74,7 @@ if 'DATABASE_URL' in os.environ:
         'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
 else:
+    # For build time, use SQLite to avoid connection errors
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
