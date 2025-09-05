@@ -20,7 +20,7 @@ COPY . .
 # Make start script executable
 RUN chmod +x start.sh
 
-# Expose port
+# Expose port (Railway will set the actual port via $PORT)
 EXPOSE 8000
 
 # Start the application
