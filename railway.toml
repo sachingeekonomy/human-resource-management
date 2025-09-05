@@ -2,7 +2,7 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python manage.py migrate && gunicorn ems.wsgi:application"
+startCommand = "chmod +x start.sh && ./start.sh"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
