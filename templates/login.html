@@ -1,0 +1,174 @@
+{% extends 'base_main.html' %}
+
+{% block title %}Login - EMS{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <div class="flex justify-center">
+                <i data-lucide="building-2" class="h-12 w-auto text-orange-500"></i>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign in to your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Or
+                <a href="{% url 'signup' %}" class="font-medium text-orange-600 hover:text-orange-500">
+                    start your journey with us
+                </a>
+            </p>
+        </div>
+        <!-- Display Django messages -->
+        {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md flex items-center space-x-3 {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                        {% if message.tags == 'error' %}
+                            <i data-lucide="alert-circle" class="h-5 w-5 text-red-500 flex-shrink-0"></i>
+                        {% elif message.tags == 'success' %}
+                            <i data-lucide="check-circle" class="h-5 w-5 text-green-500 flex-shrink-0"></i>
+                        {% else %}
+                            <i data-lucide="info" class="h-5 w-5 text-blue-500 flex-shrink-0"></i>
+                        {% endif %}
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <form class="space-y-6" method="post">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="id_username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input id="id_username" name="username" type="text" autocomplete="username" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" 
+                               placeholder="Enter your username">
+                    </div>
+                    
+                    <div>
+                        <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input id="id_password" name="password" type="password" autocomplete="current-password" required 
+                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" 
+                                   placeholder="Enter your password">
+                            <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i data-lucide="eye" class="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-pointer" id="eye-icon-password"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forgot Password Link -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-orange-600 hover:text-orange-500" id="forgot-password-link">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150 ease-in-out">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i data-lucide="log-in" class="h-5 w-5 text-orange-500 group-hover:text-orange-400"></i>
+                        </span>
+                        Sign in
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Password visibility toggle function
+function togglePasswordVisibility(passwordFieldId, eyeIconId) {
+    const passwordField = document.getElementById(passwordFieldId);
+    const eyeIcon = document.getElementById(eyeIconId);
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.setAttribute('data-lucide', 'eye-off');
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.setAttribute('data-lucide', 'eye');
+    }
+    
+    // Re-initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Forgot password functionality
+function handleForgotPassword() {
+    // For now, show an alert. Later this will be replaced with actual functionality
+    alert('Forgot Password functionality will be implemented soon. This will send a password reset link to your email.');
+    
+    // TODO: Implement actual forgot password functionality
+    // This should:
+    // 1. Show a modal or redirect to forgot password page
+    // 2. Collect user's email
+    // 3. Send password reset link to email
+    // 4. Handle password reset flow
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function() {
+            togglePasswordVisibility('id_password', 'eye-icon-password');
+        });
+    }
+    
+    // Forgot password link
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleForgotPassword();
+        });
+    }
+    
+    // Form submission handling
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Login form submission started');
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="h-5 w-5 animate-spin mr-2"></i>Signing in...';
+            submitBtn.disabled = true;
+            
+            // Re-initialize Lucide icons for the loading spinner
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Re-enable button after 5 seconds (fallback)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }, 5000);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">View Employees</h2>
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Name</th>
+                    <th scope="col" class="px-6 py-3">Email</th>
+                    <th scope="col" class="px-6 py-3">Department</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Approved Employee Example -->
+                <tr class="bg-white border-b">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">John Doe</td>
+                    <td class="px-6 py-4">john.doe@example.com</td>
+                    <td class="px-6 py-4">Engineering</td>
+                    <td class="px-6 py-4"><span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Approved</span></td>
+                    <td class="px-6 py-4">
+                        <a href="#" class="font-medium text-blue-600 hover:underline">Edit</a>
+                        <a href="#" class="font-medium text-red-600 hover:underline ml-4">Delete</a>
+                    </td>
+                </tr>
+                <!-- Not Approved Employee Example -->
+                <tr class="bg-white border-b">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Jane Smith</td>
+                    <td class="px-6 py-4">jane.smith@example.com</td>
+                    <td class="px-6 py-4">Marketing</td>
+                    <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Pending</span></td>
+                    <td class="px-6 py-4">
+                        <a href="#" class="font-medium text-green-600 hover:underline">Approve</a>
+                        <a href="#" class="font-medium text-red-600 hover:underline ml-4">Reject</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

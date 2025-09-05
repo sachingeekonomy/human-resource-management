@@ -1,0 +1,46 @@
+{% extends 'base_employee.html' %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">My Attendance</h2>
+
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-md {% if message.tags == 'success' %} bg-green-100 text-green-800 {% else %} bg-red-100 text-red-800 {% endif %}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mb-6">
+        <a href="{% url 'clock_in' %}" class="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-600">Clock In</a>
+        <a href="{% url 'clock_out' %}" class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 ml-4">Clock Out</a>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Date</th>
+                    <th scope="col" class="px-6 py-3">Clock In</th>
+                    <th scope="col" class="px-6 py-3">Clock Out</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                <tr class="bg-white border-b">
+                    <td class="px-6 py-4">{{ record.date }}</td>
+                    <td class="px-6 py-4">{{ record.clock_in }}</td>
+                    <td class="px-6 py-4">{{ record.clock_out|default:"--" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center text-gray-500">No attendance records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

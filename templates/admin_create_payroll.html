@@ -1,0 +1,31 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Create Payroll</h2>
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid gap-6 mb-6 md:grid-cols-2">
+                <div>
+                    <label for="id_employee" class="block mb-2 text-sm font-medium text-gray-900">Employee</label>
+                    {{ form.employee }}
+                </div>
+                <div>
+                    <label for="id_salary" class="block mb-2 text-sm font-medium text-gray-900">Salary</label>
+                    {{ form.salary }}
+                </div>
+                <div>
+                    <label for="id_pay_period_start" class="block mb-2 text-sm font-medium text-gray-900">Pay Period Start</label>
+                    {{ form.pay_period_start }}
+                </div>
+                <div>
+                    <label for="id_pay_period_end" class="block mb-2 text-sm font-medium text-gray-900">Pay Period End</label>
+                    {{ form.pay_period_end }}
+                </div>
+            </div>
+            <button type="submit" class="text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Create</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

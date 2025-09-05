@@ -1,0 +1,65 @@
+{% extends 'base_employee.html' %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Welcome Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+             <h2 class="text-2xl font-bold text-gray-800">Welcome, {{ user.first_name|default:user.username }}!</h2>
+             <p class="text-gray-500">Here's a summary of your activities.</p>
+        </div>
+        <div class="flex items-center bg-white border border-gray-300 rounded-md px-3 py-2 text-sm mt-4 md:mt-0">
+            <i data-lucide="calendar" class="w-5 h-5 mr-2 text-gray-500"></i>
+           <span>{{ today|date:"F d, Y" }}</span>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <div class="bg-yellow-400 p-6 rounded-lg text-white">
+            <div class="flex items-center">
+                <div class="bg-white/30 p-3 rounded-lg">
+                    <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm">Pending Leave Requests</p>
+                    <p class="text-2xl font-bold">{{ pending_leaves }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-green-500 p-6 rounded-lg text-white">
+            <div class="flex items-center">
+                <div class="bg-white/30 p-3 rounded-lg">
+                    <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm">Approved Leaves (This Month)</p>
+                    <p class="text-2xl font-bold">{{ approved_leaves_month }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-blue-500 p-6 rounded-lg text-white">
+            <div class="flex items-center">
+                <div class="bg-white/30 p-3 rounded-lg">
+                     <i data-lucide="user-check" class="w-6 h-6"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm">Attendance (This Month)</p>
+                    <p class="text-2xl font-bold">{{ attendance_month }} Days</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-purple-500 p-6 rounded-lg text-white">
+            <div class="flex items-center">
+                <div class="bg-white/30 p-3 rounded-lg">
+                   <i data-lucide="megaphone" class="w-6 h-6"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm">Announcements</p>
+                    <p class="text-2xl font-bold">{{ unread_announcements }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

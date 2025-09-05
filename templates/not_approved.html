@@ -1,0 +1,53 @@
+{% extends 'base_main.html' %}
+
+{% block title %}Account Not Approved{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="flex justify-center">
+                <i data-lucide="clock" class="h-16 w-auto text-yellow-500"></i>
+            </div>
+            <h1 class="mt-6 text-3xl font-bold text-yellow-600">Awaiting Approval</h1>
+        </div>
+        
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+            <div class="mb-6">
+                <i data-lucide="user-check" class="h-12 w-auto text-blue-500 mx-auto mb-4"></i>
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">Account Created Successfully!</h2>
+                <p class="text-gray-600">
+                    Your employee account has been created, but it's waiting for administrator approval.
+                </p>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                <h3 class="text-sm font-medium text-blue-800 mb-2">What happens next?</h3>
+                <ul class="text-sm text-blue-700 space-y-1 text-left">
+                    <li>• Admin will review your account details</li>
+                    <li>• You'll receive approval within 24-48 hours</li>
+                    <li>• Once approved, you can log in normally</li>
+                </ul>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="{% url 'login' %}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i data-lucide="log-in" class="h-4 w-4 mr-2"></i>
+                    Back to Login
+                </a>
+                
+                <a href="{% url 'home' %}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i data-lucide="home" class="h-4 w-4 mr-2"></i>
+                    Return to Homepage
+                </a>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs text-gray-500">
+                    Need help? Contact your administrator or HR department.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

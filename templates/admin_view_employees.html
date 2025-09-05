@@ -1,0 +1,99 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">View Employees</h2>
+        <div class="text-sm text-gray-600">
+            Total: {{ paginator.count }} employees
+        </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Name</th>
+                    <th scope="col" class="px-6 py-3">Department</th>
+                    
+                    <th scope="col" class="px-6 py-3">Experience</th>
+                    
+                    <th scope="col" class="px-6 py-3">Salary</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr class="bg-white border-b">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ employee.first_name }} {{ employee.last_name }}</td>
+                    
+                    <td class="px-6 py-4">{{ employee.department }}</td>
+                    
+                    <td class="px-6 py-4">{{ employee.experience }}</td>
+                    
+                    <td class="px-6 py-4">{{ employee.salary }}</td>
+                    <td class="px-6 py-4">
+                        {% if employee.is_approved %}
+                            <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Approved</span>
+                        {% else %}
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if employee.is_approved %}
+                            <a href="{% url 'admin_edit_employee' employee.pk %}" class="font-medium text-blue-600 hover:underline">Edit</a>
+                            <a href="{% url 'admin_delete_employee' employee.pk %}" class="font-medium text-red-600 hover:underline ml-4">Delete</a>
+                        {% else %}
+                            <a href="{% url 'admin_approve_employee' employee.pk %}" class="font-medium text-green-600 hover:underline">Approve</a>
+                            <a href="{% url 'admin_reject_employee' employee.pk %}" class="font-medium text-red-600 hover:underline ml-4">Reject</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No employees found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="mt-6 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} results
+                </div>
+                
+                <nav class="flex items-center space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50">
+                            <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm font-medium text-gray-700 bg-orange-50 border border-orange-300">
+                        Page {{ page_obj.number }} of {{ paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </a>
+                        <a href="?page={{ paginator.num_pages }}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50">
+                            <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
