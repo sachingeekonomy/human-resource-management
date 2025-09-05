@@ -1,0 +1,8 @@
+# Ignore files that might cause build issues
+*.log
+*.pyc
+__pycache__/
+.env
+.env.local
+.env.production
+.env.staging

@@ -82,6 +82,16 @@ else:
         }
     }
 
+# Disable migrations during build if no DATABASE_URL
+if 'DATABASE_URL' not in os.environ:
+    MIGRATION_MODULES = {
+        'core': None,
+        'admin': None,
+        'auth': None,
+        'contenttypes': None,
+        'sessions': None,
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
