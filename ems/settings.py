@@ -15,7 +15,30 @@ SECRET_KEY = 'django-insecure-qn^7gs(gilcl+5f$g((v3c@^qjtp@&-g6od(=j*)+s(g9sj@=b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']  # Allow all hosts for Railway deployment
+ALLOWED_HOSTS = ['*']
+
+# CSRF settings for production
+CSRF_TRUSTED_ORIGINS = [
+    'https://human-resource-management-production.up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
+
+# CSRF cookie settings
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = True
+
+# Session cookie settings
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Additional security settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 
 # Application definition
