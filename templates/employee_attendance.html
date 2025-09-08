@@ -30,9 +30,9 @@
             <tbody>
                 {% for record in attendance_records %}
                 <tr class="bg-white border-b">
-                    <td class="px-6 py-4">{{ record.date }}</td>
-                    <td class="px-6 py-4">{{ record.clock_in }}</td>
-                    <td class="px-6 py-4">{{ record.clock_out|default:"--" }}</td>
+                    <td class="px-6 py-4">{{ record.date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4">{{ record.clock_in|time:"g:i A" }}</td>
+                    <td class="px-6 py-4">{{ record.clock_out|time:"g:i A"|default:"--" }}</td>
                 </tr>
                 {% empty %}
                 <tr>

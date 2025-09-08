@@ -103,9 +103,9 @@
                 {% for record in attendance_records %}
                 <tr class="bg-white border-b hover:bg-gray-50">
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ record.employee.first_name }} {{ record.employee.last_name }}</td>
-                    <td class="px-6 py-4">{{ record.date }}</td>
-                    <td class="px-6 py-4">{{ record.clock_in }}</td>
-                    <td class="px-6 py-4">{{ record.clock_out|default:"--" }}</td>
+                    <td class="px-6 py-4">{{ record.date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4">{{ record.clock_in|time:"g:i A" }}</td>
+                    <td class="px-6 py-4">{{ record.clock_out|time:"g:i A"|default:"--" }}</td>
                     <td class="px-6 py-4">
                         {% if record.clock_in %}
                             <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Present</span>

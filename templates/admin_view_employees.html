@@ -41,14 +41,17 @@
                         {% endif %}
                     </td>
                     <td class="px-6 py-4">
-                        {% if employee.is_approved %}
-                            <a href="{% url 'admin_edit_employee' employee.pk %}" class="font-medium text-blue-600 hover:underline">Edit</a>
-                            <a href="{% url 'admin_delete_employee' employee.pk %}" class="font-medium text-red-600 hover:underline ml-4">Delete</a>
-                        {% else %}
-                            <a href="{% url 'admin_approve_employee' employee.pk %}" class="font-medium text-green-600 hover:underline">Approve</a>
-                            <a href="{% url 'admin_reject_employee' employee.pk %}" class="font-medium text-red-600 hover:underline ml-4">Reject</a>
-                        {% endif %}
+                        <div class="flex flex-wrap gap-2">
+                            {% if employee.is_approved %}
+                                <a href="{% url 'admin_edit_employee' employee.pk %}" class="text-blue-600 hover:underline">Edit</a>
+                                <a href="{% url 'admin_delete_employee' employee.pk %}" class="text-red-600 hover:underline">Delete</a>
+                            {% else %}
+                                <a href="{% url 'admin_approve_employee' employee.pk %}" class="text-green-600 hover:underline">Approve</a>
+                                <a href="{% url 'admin_reject_employee' employee.pk %}" class="text-red-600 hover:underline">Reject</a>
+                            {% endif %}
+                        </div>
                     </td>
+                    
                 </tr>
                 {% empty %}
                 <tr>

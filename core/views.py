@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import date, datetime
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import models
@@ -142,7 +143,7 @@ class AdminDashboardView(AdminRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        today = date.today()
+        today = timezone.now().date()
         current_month = today.month
         current_year = today.year
 
@@ -170,7 +171,7 @@ class EmployeeDashboardView(EmployeeRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         employee = self.request.user
-        today = date.today()
+        today = timezone.now().date()
         current_month = today.month
         current_year = today.year
 
@@ -543,14 +544,14 @@ def clock_in(request):
     if not request.user.role == 'EMPLOYEE':
         return redirect('admin_dashboard')
     # Check if the employee has already clocked in today
-    if Attendance.objects.filter(employee=request.user, date=date.today()).exists():
+    if Attendance.objects.filter(employee=request.user, date=timezone.now().date()).exists():
         messages.error(request, 'You have already clocked in today.')
         return redirect('employee_attendance')
 
     Attendance.objects.create(
         employee=request.user,
-        date=date.today(),
-        clock_in=datetime.now().time()
+        date=timezone.now().date(),
+        clock_in=timezone.now().time()
     )
     messages.success(request, 'Clocked in successfully.')
     return redirect('employee_attendance')
@@ -560,11 +561,11 @@ def clock_out(request):
     if not request.user.role == 'EMPLOYEE':
         return redirect('admin_dashboard')
     try:
-        attendance = Attendance.objects.get(employee=request.user, date=date.today())
+        attendance = Attendance.objects.get(employee=request.user, date=timezone.now().date())
         if attendance.clock_out:
             messages.error(request, 'You have already clocked out today.')
         else:
-            attendance.clock_out = datetime.now().time()
+            attendance.clock_out = timezone.now().time()
             attendance.save()
             messages.success(request, 'Clocked out successfully.')
     except Attendance.DoesNotExist:
