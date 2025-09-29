@@ -1,0 +1,54 @@
+{% extends 'base_manager.html' %}
+
+{% block content %}
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Announcements</h2>
+    
+    {% if announcements %}
+        <div class="space-y-6">
+            {% for announcement in announcements %}
+            <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-orange-500">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ announcement.title }}</h3>
+                    <span class="text-sm text-gray-500">{{ announcement.created_at|date:"M d, Y" }}</span>
+                </div>
+                <p class="text-gray-700 leading-relaxed">{{ announcement.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+                {% endif %}
+                
+                <span class="px-3 py-2 text-sm font-medium text-white bg-orange-500 border border-orange-500 rounded-md">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Last</a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+            <i data-lucide="megaphone" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No Announcements</h3>
+            <p class="text-gray-500">There are no announcements at the moment.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+</script>
+{% endblock %}
+

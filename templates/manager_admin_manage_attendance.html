@@ -1,0 +1,150 @@
+{% extends 'base_manager.html' %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Manage Attendance</h2>
+        <a href="{% url 'manager_add_attendance' %}" class="bg-orange-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 flex items-center">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+            Add Attendance
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div>
+                <label for="employee" class="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+                <input type="text" name="employee" id="employee" value="{{ current_employee }}" 
+                       placeholder="Search by name or username" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ current_start_date }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ current_end_date }}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-600 flex items-center">
+                    <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                    Apply Filters
+                </button>
+                <a href="{% url 'manager_manage_attendance' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-600 flex items-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Employee</th>
+                    <th scope="col" class="px-6 py-3">Date</th>
+                    <th scope="col" class="px-6 py-3">Clock In</th>
+                    <th scope="col" class="px-6 py-3">Clock Out</th>
+                    <th scope="col" class="px-6 py-3">Hours Worked</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        {{ record.employee.first_name }} {{ record.employee.last_name }}
+                        <div class="text-xs text-gray-500">{{ record.employee.username }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ record.date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ record.clock_in|time:"H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if record.clock_out %}
+                            {{ record.clock_out|time:"H:i" }}
+                        {% else %}
+                            <span class="text-gray-400">Not clocked out</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if record.clock_out %}
+                            {{ record.clock_out|timeuntil:record.clock_in }}
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i data-lucide="clock" class="w-12 h-12 text-gray-400 mb-2"></i>
+                            <p class="text-lg font-medium">No attendance records found</p>
+                            <p class="text-sm">Try adjusting your filters or add new attendance records.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} results
+                </div>
+                <nav class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            First
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm font-medium text-white bg-orange-500 border border-orange-500 rounded-md">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Next
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Last
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+</script>
+{% endblock %}

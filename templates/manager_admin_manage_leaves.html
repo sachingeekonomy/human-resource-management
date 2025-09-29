@@ -1,0 +1,164 @@
+{% extends 'base_manager.html' %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Manage Leave Requests</h2>
+        <div class="text-sm text-gray-600">
+            Total: {{ paginator.count }} requests
+        </div>
+    </div>
+    
+    <!-- Filter Form -->
+    <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter Leave Requests</h3>
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="employee" class="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+                <input type="text" name="employee" id="employee" value="{{ current_employee }}" 
+                       placeholder="Search by name or username"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+            </div>
+            
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date (From)</label>
+                <input type="date" name="start_date" id="start_date" value="{{ current_start_date }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+            </div>
+            
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date (To)</label>
+                <input type="date" name="end_date" id="end_date" value="{{ current_end_date }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+            </div>
+            
+            <div class="md:col-span-2 lg:col-span-4 flex space-x-3">
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    <i data-lucide="search" class="w-4 h-4 inline mr-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'manager_manage_leaves' %}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    <i data-lucide="x" class="w-4 h-4 inline mr-2"></i>Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Employee</th>
+                    <th scope="col" class="px-6 py-3">Start Date</th>
+                    <th scope="col" class="px-6 py-3">End Date</th>
+                    <th scope="col" class="px-6 py-3">Reason</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        {{ leave.employee.first_name }} {{ leave.employee.last_name }}
+                        <div class="text-xs text-gray-500">{{ leave.employee.username }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.start_date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ leave.end_date|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4 max-w-xs truncate">{{ leave.reason }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if leave.status == 'PENDING' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                        {% elif leave.status == 'APPROVED' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+                        {% else %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if leave.status == 'PENDING' %}
+                            <div class="flex space-x-2">
+                                <a href="{% url 'manager_approve_leave' leave.pk %}" 
+                                   class="text-green-600 hover:text-green-800 font-medium"
+                                   onclick="return confirm('Are you sure you want to approve this leave request?')">
+                                    Approve
+                                </a>
+                                <a href="{% url 'manager_reject_leave' leave.pk %}" 
+                                   class="text-red-600 hover:text-red-800 font-medium"
+                                   onclick="return confirm('Are you sure you want to reject this leave request?')">
+                                    Reject
+                                </a>
+                            </div>
+                        {% else %}
+                            <span class="text-gray-400 text-sm">No actions available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i data-lucide="calendar-x" class="w-12 h-12 text-gray-400 mb-2"></i>
+                            <p class="text-lg font-medium">No leave requests found</p>
+                            <p class="text-sm">Try adjusting your filters or check back later.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} results
+                </div>
+                <nav class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            First
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm font-medium text-white bg-orange-500 border border-orange-500 rounded-md">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Next
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_employee %}&employee={{ current_employee }}{% endif %}{% if current_start_date %}&start_date={{ current_start_date }}{% endif %}{% if current_end_date %}&end_date={{ current_end_date }}{% endif %}" 
+                           class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Last
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+</script>
+{% endblock %}
+

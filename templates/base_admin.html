@@ -95,6 +95,7 @@
                         Dashboard
                     </a>
                 </li>
+                {% if user.has_manager_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700  font-semibold hover:bg-gray-100">
                         <span class="flex items-center">
@@ -108,6 +109,8 @@
                         <li><a href="{% url 'admin_add_employee' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_add_employee">Add Employee</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.has_admin_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
                         <span class="flex items-center">
@@ -121,6 +124,8 @@
                         <li><a href="{% url 'admin_add_department' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_add_department">Add Department</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.has_manager_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
                          <span class="flex items-center">
@@ -133,6 +138,8 @@
                         <li><a href="{% url 'admin_manage_leaves' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_manage_leaves">Manage Leaves</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.has_manager_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
                          <span class="flex items-center">
@@ -146,6 +153,8 @@
                         <li><a href="{% url 'admin_create_payroll' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_create_payroll">Create Payroll</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.has_manager_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
                          <span class="flex items-center">
@@ -159,6 +168,8 @@
                         <li><a href="{% url 'admin_add_attendance' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_add_attendance">Add Attendance</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.has_manager_permissions %}
                 <li class="menu-item">
                     <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
                          <span class="flex items-center">
@@ -172,6 +183,7 @@
                         <li><a href="{% url 'admin_add_announcement' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="admin_add_announcement">Add Announcement</a></li>
                     </ul>
                 </li>
+                {% endif %}
                 </ul>
         </nav>
     </aside>
@@ -193,10 +205,12 @@
                 
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4">
+              {% if user.has_manager_permissions %}
               <a href="{% url 'admin_add_employee' %}" class="bg-orange-500 text-white rounded-md px-4 py-2 text-sm font-medium flex items-center">
                 <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
              <span class="hidden sm:inline">Add New Employee</span>
                 </a>
+              {% endif %}
                 <div><form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600">Logout</button>

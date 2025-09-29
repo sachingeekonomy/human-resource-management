@@ -13,3 +13,14 @@ def get_field_label(form, field_name):
         return field.label if field.label else field_name.replace('_', ' ').title()
     return field_name.replace('_', ' ').title()
 
+@register.filter
+def add_class(field, css_class):
+    """
+    Add CSS class to a form field.
+    """
+    if hasattr(field, 'field'): 
+        field.field.widget.attrs['class'] = css_class
+    else:
+        field.widget.attrs['class'] = css_class
+    return field
+

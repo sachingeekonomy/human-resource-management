@@ -72,7 +72,8 @@ class Command(BaseCommand):
                 'birthday': date(1990, 5, 15),
                 'experience': 3,
                 'date_of_joining': date(2021, 3, 1),
-                'is_approved': True
+                'is_approved': True,
+                'role': 'MANAGER'  # HR Manager
             },
             {
                 'username': 'jane.smith',
@@ -80,11 +81,12 @@ class Command(BaseCommand):
                 'first_name': 'Jane',
                 'last_name': 'Smith',
                 'department': departments[1] if departments else None,  # IT
-                'salary': Decimal('55000.00'),
+                'salary': Decimal('75000.00'),
                 'birthday': date(1988, 8, 22),
-                'experience': 5,
+                'experience': 8,
                 'date_of_joining': date(2019, 6, 15),
-                'is_approved': True
+                'is_approved': True,
+                'role': 'MANAGER'  # Technical Lead
             },
             {
                 'username': 'mike.johnson',
@@ -96,7 +98,8 @@ class Command(BaseCommand):
                 'birthday': date(1992, 12, 10),
                 'experience': 2,
                 'date_of_joining': date(2022, 1, 10),
-                'is_approved': True
+                'is_approved': True,
+                'role': 'EMPLOYEE'
             },
             {
                 'username': 'sarah.wilson',
@@ -108,7 +111,8 @@ class Command(BaseCommand):
                 'birthday': date(1989, 3, 25),
                 'experience': 4,
                 'date_of_joining': date(2020, 9, 1),
-                'is_approved': True
+                'is_approved': True,
+                'role': 'EMPLOYEE'
             },
             {
                 'username': 'david.brown',
@@ -116,11 +120,12 @@ class Command(BaseCommand):
                 'first_name': 'David',
                 'last_name': 'Brown',
                 'department': departments[4] if departments else None,  # Operations
-                'salary': Decimal('46000.00'),
+                'salary': Decimal('65000.00'),
                 'birthday': date(1991, 7, 8),
-                'experience': 3,
+                'experience': 6,
                 'date_of_joining': date(2021, 11, 15),
-                'is_approved': True
+                'is_approved': True,
+                'role': 'MANAGER'  # Head of Operations
             }
         ]
         
@@ -140,7 +145,7 @@ class Command(BaseCommand):
                     experience=emp_data['experience'],
                     date_of_joining=emp_data['date_of_joining'],
                     is_approved=emp_data['is_approved'],
-                    role='EMPLOYEE'
+                    role=emp_data['role']
                 )
                 created_employees.append(user)
                 self.stdout.write(f'  Created employee: {emp_data["first_name"]} {emp_data["last_name"]}')
