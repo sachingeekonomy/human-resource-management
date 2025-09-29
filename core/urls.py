@@ -7,6 +7,7 @@ from .views import (
     CustomLoginView, 
     DashboardRedirectView,
     AdminDashboardView,
+    ManagerDashboardView,
     EmployeeDashboardView,
     AboutUsView,
     ContactUsView,
@@ -56,6 +57,7 @@ urlpatterns = [
     # Dashboard URLs
     path('dashboard/', DashboardRedirectView.as_view(), name='dashboard_redirect'),
     path('dashboard/admin/', AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('dashboard/manager/', ManagerDashboardView.as_view(), name='manager_dashboard'),
     path('dashboard/employee/', EmployeeDashboardView.as_view(), name='employee_dashboard'),
     path('not-approved/', NotApprovedView.as_view(), name='not_approved'),
 
@@ -66,6 +68,10 @@ urlpatterns = [
     path('dashboard/admin/employees/delete/<int:pk>/', AdminEmployeeDeleteView.as_view(), name='admin_delete_employee'),
     path('dashboard/admin/employees/approve/<int:pk>/', approve_employee, name='admin_approve_employee'),
     path('dashboard/admin/employees/reject/<int:pk>/', reject_employee, name='admin_reject_employee'),
+    
+    # Manager Employee Management URLs (same views, different URLs)
+    path('dashboard/manager/employees/', AdminEmployeeListView.as_view(), name='manager_view_employees'),
+    path('dashboard/manager/employees/add/', AdminAddEmployeeView.as_view(), name='manager_add_employee'),
     
      # Admin Department Management URLs
     path('dashboard/admin/departments/', AdminDepartmentListView.as_view(), name='admin_view_departments'),
@@ -81,6 +87,11 @@ urlpatterns = [
     path('dashboard/admin/leaves/', AdminLeaveManageView.as_view(), name='admin_manage_leaves'),
     path('dashboard/admin/leaves/approve/<int:pk>/', approve_leave, name='admin_approve_leave'),
     path('dashboard/admin/leaves/reject/<int:pk>/', reject_leave, name='admin_reject_leave'),
+    
+    # Manager Leave Management URLs (same views, different URLs)
+    path('dashboard/manager/leaves/', AdminLeaveManageView.as_view(), name='manager_manage_leaves'),
+    path('dashboard/manager/leaves/approve/<int:pk>/', approve_leave, name='manager_approve_leave'),
+    path('dashboard/manager/leaves/reject/<int:pk>/', reject_leave, name='manager_reject_leave'),
 
     # Payroll Management URLs
     path('dashboard/admin/payroll/', AdminPayrollListView.as_view(), name='admin_manage_payroll'),
@@ -88,6 +99,11 @@ urlpatterns = [
     path('dashboard/admin/payroll/process/<int:pk>/', process_payroll, name='admin_process_payroll'),
     path('dashboard/employee/payslips/', EmployeePayslipListView.as_view(), name='employee_payslips'),
     path('dashboard/employee/payslip/<int:pk>/pdf/', payslip_pdf_view, name='payslip_pdf'),
+    
+    # Manager Payroll Management URLs (same views, different URLs)
+    path('dashboard/manager/payroll/', AdminPayrollListView.as_view(), name='manager_manage_payroll'),
+    path('dashboard/manager/payroll/create/', CreatePayrollView.as_view(), name='manager_create_payroll'),
+    path('dashboard/manager/payroll/process/<int:pk>/', process_payroll, name='manager_process_payroll'),
 
     # Attendance Management URLs
     path('dashboard/employee/attendance/', EmployeeAttendanceView.as_view(), name='employee_attendance'),
@@ -95,6 +111,10 @@ urlpatterns = [
     path('dashboard/employee/clock-out/', clock_out, name='clock_out'),
     path('dashboard/admin/attendance/', AdminManageAttendanceView.as_view(), name='admin_manage_attendance'),
     path('dashboard/admin/attendance/add/', AdminAddAttendanceView.as_view(), name='admin_add_attendance'),
+    
+    # Manager Attendance Management URLs (same views, different URLs)
+    path('dashboard/manager/attendance/', AdminManageAttendanceView.as_view(), name='manager_manage_attendance'),
+    path('dashboard/manager/attendance/add/', AdminAddAttendanceView.as_view(), name='manager_add_attendance'),
 
     # Announcement Management URLs
     path('dashboard/admin/announcements/', AdminAnnouncementListView.as_view(), name='admin_view_announcements'),
@@ -102,5 +122,9 @@ urlpatterns = [
     path('dashboard/admin/announcements/edit/<int:pk>/', AdminAnnouncementUpdateView.as_view(), name='admin_edit_announcement'),
     path('dashboard/admin/announcements/delete/<int:pk>/', AdminAnnouncementDeleteView.as_view(), name='admin_delete_announcement'),
     path('dashboard/employee/announcements/', EmployeeAnnouncementListView.as_view(), name='employee_view_announcements'),
+    
+    # Manager Announcement Management URLs (same views, different URLs)
+    path('dashboard/manager/announcements/', AdminAnnouncementListView.as_view(), name='manager_view_announcements'),
+    path('dashboard/manager/announcements/add/', AdminAddAnnouncementView.as_view(), name='manager_add_announcement'),
 
 ]

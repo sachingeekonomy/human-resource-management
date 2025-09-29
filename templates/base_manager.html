@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons (Vanilla JS version) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* A light gray background for the main content area */
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .sidebar {
+            background-color: #ffffff;
+        }
+        .active-link {
+            background-color: #fff1e6;
+            color: #ff8c37;
+            border-right: 3px solid #ff8c37;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            background-color: #f8fafc;
+        }
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .submenu.active {
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- =================================================================
+             SIDEBAR
+        ================================================================== -->
+        <aside id="sidebar" class="w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out fixed inset-y-0 left-0 z-30 md:translate-x-0 md:static md:inset-0">
+            <div class="flex items-center justify-center h-16 bg-orange-500">
+                <h1 class="text-white text-xl font-bold">EMS Manager</h1>
+            </div>
+            
+            <nav class="mt-8">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'manager_dashboard' %}" class="nav-link flex items-center px-6 py-3 text-gray-700 font-semibold" data-url="manager_dashboard">
+                            <i data-lucide="layout-grid" class="w-5 h-5 mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    
+                    <!-- Employee Management -->
+                    <li class="menu-item">
+                        <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
+                            <span class="flex items-center">
+                                <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                                Employee Management
+                            </span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                        </a>
+                        <ul class="submenu ml-10">
+                            <li><a href="{% url 'manager_view_employees' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_view_employees">View Employees</a></li>
+                            <li><a href="{% url 'manager_add_employee' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_add_employee">Add Employee</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Leave Management -->
+                    <li class="menu-item">
+                        <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
+                            <span class="flex items-center">
+                                <i data-lucide="calendar-check" class="w-5 h-5 mr-3"></i>
+                                Leave Management
+                            </span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                        </a>
+                        <ul class="submenu ml-10">
+                            <li><a href="{% url 'manager_manage_leaves' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_manage_leaves">Manage Leaves</a></li>
+                            <li><a href="{% url 'leave_apply' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="leave_apply">Apply for Leave</a></li>
+                            <li><a href="{% url 'leave_history' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="leave_history">Leave History</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Payroll Management -->
+                    <li class="menu-item">
+                        <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
+                            <span class="flex items-center">
+                                <i data-lucide="wallet" class="w-5 h-5 mr-3"></i>
+                                Payroll Management
+                            </span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                        </a>
+                        <ul class="submenu ml-10">
+                            <li><a href="{% url 'manager_manage_payroll' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_manage_payroll">Manage Payroll</a></li>
+                            <li><a href="{% url 'manager_create_payroll' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_create_payroll">Create Payroll</a></li>
+                            <li><a href="{% url 'employee_payslips' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="employee_payslips">My Payslips</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Attendance Management -->
+                    <li class="menu-item">
+                        <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
+                            <span class="flex items-center">
+                                <i data-lucide="check-square" class="w-5 h-5 mr-3"></i>
+                                Attendance Management
+                            </span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                        </a>
+                        <ul class="submenu ml-10">
+                            <li><a href="{% url 'manager_manage_attendance' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_manage_attendance">Manage Attendance</a></li>
+                            <li><a href="{% url 'manager_add_attendance' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_add_attendance">Add Attendance</a></li>
+                            <li><a href="{% url 'employee_attendance' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="employee_attendance">My Attendance</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Announcements -->
+                    <li class="menu-item">
+                        <a href="#" class="flex items-center justify-between px-6 py-3 text-gray-700 font-semibold hover:bg-gray-100">
+                            <span class="flex items-center">
+                                <i data-lucide="megaphone" class="w-5 h-5 mr-3"></i>
+                                Announcements
+                            </span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                        </a>
+                        <ul class="submenu ml-10">
+                            <li><a href="{% url 'manager_view_announcements' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_view_announcements">View Announcements</a></li>
+                            <li><a href="{% url 'manager_add_announcement' %}" class="submenu-link block px-4 py-2 text-sm text-gray-600 font-semibold" data-url="manager_add_announcement">Add Announcement</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Overlay for mobile menu -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+
+        <!-- =================================================================
+             MAIN CONTENT
+        ================================================================== -->
+        <main class="flex-1">
+            <!-- Header -->
+            <header class="flex items-center justify-between p-6 bg-white border-b border-gray-200">
+                <div class="flex items-center">
+                    <!-- Hamburger Menu -->
+                    <button id="menu-btn" class="mr-4 p-2 rounded-md hover:bg-gray-100">
+                        <i data-lucide="menu" class="w-6 h-6 text-gray-600"></i>
+                    </button>
+                    
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="{% url 'manager_add_employee' %}" class="bg-orange-500 text-white rounded-md px-4 py-2 text-sm font-medium flex items-center">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                        <span class="hidden sm:inline">Add New Employee</span>
+                    </a>
+                    <div><form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600">Logout</button>
+                        </form></div>
+                    
+                    <!-- User Profile -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm font-medium">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                        </div>
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-medium text-gray-700">{{ user.first_name }} {{ user.last_name }}</p>
+                            <p class="text-xs text-gray-500">Manager</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 overflow-y-auto">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // Submenu toggle
+        document.querySelectorAll('.menu-item > a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const submenu = link.nextElementSibling;
+                const chevron = link.querySelector('i[data-lucide="chevron-right"]');
+                
+                // Close other submenus
+                document.querySelectorAll('.submenu').forEach(menu => {
+                    if (menu !== submenu) {
+                        menu.classList.remove('active');
+                    }
+                });
+                
+                // Reset other chevrons
+                document.querySelectorAll('.menu-item > a i[data-lucide="chevron-right"]').forEach(icon => {
+                    if (icon !== chevron) {
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                // Toggle current submenu
+                submenu.classList.toggle('active');
+                chevron.style.transform = submenu.classList.contains('active') ? 'rotate(90deg)' : 'rotate(0deg)';
+            });
+        });
+
+        // Active link highlighting
+        const currentUrl = window.location.pathname;
+        document.querySelectorAll('.nav-link, .submenu-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && currentUrl.includes(href.split('/').pop())) {
+                link.classList.add('active-link');
+            }
+        });
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

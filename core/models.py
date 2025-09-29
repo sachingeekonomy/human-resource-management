@@ -63,6 +63,7 @@ class User(AbstractUser):
     """
     ROLE_CHOICES = (
         ('ADMIN', 'Admin'),
+        ('MANAGER', 'Manager'),
         ('EMPLOYEE', 'Employee'),
     )
 
@@ -97,6 +98,50 @@ class User(AbstractUser):
         related_name="custom_user_permissions_set",  # Unique related_name
         related_query_name="user",
     )
+
+    def is_admin(self):
+        """Check if user is an admin (superuser or ADMIN role)"""
+        return self.is_superuser or self.role == 'ADMIN'
+    
+    def is_manager(self):
+        """Check if user is a manager (MANAGER role)"""
+        return self.role == 'MANAGER'
+    
+    def is_employee(self):
+        """Check if user is a regular employee"""
+        return self.role == 'EMPLOYEE'
+    
+    def has_admin_permissions(self):
+        """Check if user has admin-level permissions"""
+        return self.is_admin()
+    
+    def has_manager_permissions(self):
+        """Check if user has manager-level permissions (admin or manager)"""
+        return self.is_admin() or self.is_manager()
+    
+    def can_manage_employees(self):
+        """Check if user can manage employees"""
+        return self.has_manager_permissions()
+    
+    def can_manage_departments(self):
+        """Check if user can manage departments"""
+        return self.has_admin_permissions()
+    
+    def can_manage_payroll(self):
+        """Check if user can manage payroll"""
+        return self.has_manager_permissions()
+    
+    def can_manage_attendance(self):
+        """Check if user can manage attendance"""
+        return self.has_manager_permissions()
+    
+    def can_manage_leaves(self):
+        """Check if user can manage leaves"""
+        return self.has_manager_permissions()
+    
+    def can_manage_announcements(self):
+        """Check if user can manage announcements"""
+        return self.has_manager_permissions()
 
 class Leave(models.Model):
     STATUS_CHOICES = (

@@ -337,6 +337,11 @@ class EmployeeUpdateForm(UserChangeForm):
         empty_label="Select Department (Optional)",
         required=False
     )
+    role = forms.ChoiceField(
+        choices=User.ROLE_CHOICES,
+        required=True,
+        help_text="Select the role for this user"
+    )
 
 
     def __init__(self, *args, **kwargs):
@@ -357,6 +362,7 @@ class EmployeeUpdateForm(UserChangeForm):
             'first_name', 
             'last_name', 
             'email', 
+            'role',
             'department', 
             'salary', 
             'birthday', 
