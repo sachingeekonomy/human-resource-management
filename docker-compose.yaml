@@ -26,10 +26,6 @@ services:
         wget -O ems.zip https://github.com/sachingeekonomy/human-resource-management/archive/refs/heads/main.zip &&
         unzip ems.zip &&
         cp -r human-resource-management-main/* /app/ &&
-        echo 'Updating settings for QNAP deployment...' &&
-        sed -i 's/CSRF_COOKIE_SECURE = True/CSRF_COOKIE_SECURE = False/g' /app/ems/settings.py &&
-        sed -i 's/SESSION_COOKIE_SECURE = True/SESSION_COOKIE_SECURE = False/g' /app/ems/settings.py &&
-        sed -i '/CSRF_TRUSTED_ORIGINS = \[/a\    "http://10.0.0.178:8001",\n    "http://localhost:8001",\n    "http://127.0.0.1:8001",' /app/ems/settings.py &&
         cd /app &&
         echo 'Setting up Django environment...' &&
         export DJANGO_SETTINGS_MODULE=ems.settings &&
