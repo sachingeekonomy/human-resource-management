@@ -1,0 +1,87 @@
+services:
+  ems-app:
+    image: python:3.12-slim
+    container_name: employee-management-system
+    ports:
+      - "8001:8000"  # Using port 8001 to avoid conflict with other services
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+      - DEBUG=False
+      - DATABASE_URL=postgres://postgres:postgres@ems-db:5432/ems_db
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,*
+      - DJANGO_SETTINGS_MODULE=ems.settings
+      - PYTHONPATH=/app
+    volumes:
+      - ems-media:/app/media
+      - ems-static:/app/staticfiles
+    working_dir: /app
+    command: >
+      sh -c "
+        apt-get update &&
+        apt-get install -y gcc postgresql-client curl libfreetype6-dev libfontconfig1-dev libjpeg-dev zlib1g-dev wget unzip &&
+        pip install Django==5.2.4 gunicorn==21.2.0 psycopg2-binary==2.9.9 whitenoise==6.6.0 dj-database-url==2.1.0 Pillow==10.1.0 xhtml2pdf==0.2.11 &&
+        echo 'Downloading Employee Management System...' &&
+        cd /tmp &&
+        wget -O ems.zip https://github.com/sachingeekonomy/human-resource-management/archive/refs/heads/main.zip &&
+        unzip ems.zip &&
+        cp -r human-resource-management-main/* /app/ &&
+        cd /app &&
+        echo 'Setting up Django environment...' &&
+        export DJANGO_SETTINGS_MODULE=ems.settings &&
+        export PYTHONPATH=/app &&
+        echo 'Waiting for database...' &&
+        sleep 15 &&
+        echo 'Running database migrations...' &&
+        python manage.py migrate &&
+        echo 'Collecting static files...' &&
+        python manage.py collectstatic --noinput &&
+        echo 'Skipping admin user creation for now...' &&
+        echo 'Starting Employee Management System...' &&
+        gunicorn ems.wsgi:application --bind 0.0.0.0:8000 --timeout 120
+      "
+    depends_on:
+      ems-db:
+        condition: service_healthy
+    networks:
+      - ems-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  ems-db:
+    image: postgres:16
+    container_name: ems-database
+    environment:
+      POSTGRES_DB: ems_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"  # Using port 5433 to avoid conflict with Horilla DB
+    restart: unless-stopped
+    volumes:
+      - ems-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ems-network
+
+volumes:
+  ems-data:
+    driver: local
+  ems-media:
+    driver: local
+  ems-static:
+    driver: local
+
+networks:
+  ems-network:
+    driver: bridge
