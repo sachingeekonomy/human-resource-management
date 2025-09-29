@@ -22,16 +22,19 @@ CSRF_TRUSTED_ORIGINS = [
     'https://human-resource-management-production.up.railway.app',
     'https://*.railway.app',
     'https://*.up.railway.app',
+    'http://10.0.0.178:8001',  # Add your QNAP IP
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
 ]
 
-# CSRF cookie settings
-CSRF_COOKIE_SECURE = True
+# CSRF cookie settings - adjusted for HTTP deployment
+CSRF_COOKIE_SECURE = False  # Set to False for HTTP
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_USE_SESSIONS = True
 
-# Session cookie settings
-SESSION_COOKIE_SECURE = True
+# Session cookie settings - adjusted for HTTP deployment
+SESSION_COOKIE_SECURE = False  # Set to False for HTTP
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
