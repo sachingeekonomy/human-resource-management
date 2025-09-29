@@ -24,16 +24,25 @@ class AdminRequiredMixin(AccessMixin):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+        if not request.user.has_admin_permissions():
+            return redirect('employee_dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+class ManagerRequiredMixin(AccessMixin):
+    """Verify that the current user has manager permissions (admin or manager)."""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if not request.user.has_manager_permissions():
             return redirect('employee_dashboard')
         return super().dispatch(request, *args, **kwargs)
 
 class EmployeeRequiredMixin(AccessMixin):
-    """Verify that the current user is an approved employee."""
+    """Verify that the current user is an approved employee or manager."""
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if request.user.is_superuser or request.user.role == 'ADMIN':
+        if request.user.has_admin_permissions():
             return redirect('admin_dashboard')
         if not request.user.is_approved:
             return redirect('not_approved')
@@ -43,8 +52,10 @@ class RedirectLoggedInUserMixin(AccessMixin):
     """Redirects logged-in users from public pages to their dashboard."""
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            if request.user.is_superuser or request.user.role == 'ADMIN':
+            if request.user.has_admin_permissions():
                 return redirect('admin_dashboard')
+            elif request.user.role == 'MANAGER':
+                return redirect('manager_dashboard')
             else:
                 return redirect('employee_dashboard')
         return super().dispatch(request, *args, **kwargs)
@@ -127,8 +138,10 @@ class DashboardRedirectView(LoginRequiredMixin, TemplateView):
     Redirects users to their respective dashboards based on their role.
     """
     def get(self, request, *args, **kwargs):
-        if request.user.is_superuser or request.user.role == 'ADMIN':
+        if request.user.has_admin_permissions():
             return redirect('admin_dashboard')
+        elif request.user.role == 'MANAGER':
+            return redirect('manager_dashboard')
         elif request.user.role == 'EMPLOYEE':
             if not request.user.is_approved:
                 return redirect('not_approved')
@@ -154,6 +167,46 @@ class AdminDashboardView(AdminRequiredMixin, TemplateView):
         context['pending_leave_approvals'] = Leave.objects.filter(status='PENDING').count()
 
         # Second row stats
+        context['present_today'] = Attendance.objects.filter(date=today, clock_in__isnull=False).count()
+        context['total_announcements'] = Announcement.objects.count()
+        context['approved_leave_month'] = Leave.objects.filter(status='APPROVED', start_date__year=current_year, start_date__month=current_month).count()
+        context['pending_payrolls'] = Payroll.objects.filter(status='PENDING').count()
+
+        context['today'] = today
+        return context
+
+class ManagerDashboardView(ManagerRequiredMixin, TemplateView):
+    """
+    Displays the manager dashboard with both employee and manager features.
+    """
+    template_name = 'manager_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        manager = self.request.user
+        today = timezone.now().date()
+        current_month = today.month
+        current_year = today.year
+
+        # Employee stats (personal)
+        context['pending_leaves'] = Leave.objects.filter(employee=manager, status='PENDING').count()
+        context['approved_leaves_month'] = Leave.objects.filter(
+            employee=manager, 
+            status='APPROVED', 
+            start_date__year=current_year, 
+            start_date__month=current_month
+        ).count()
+        context['attendance_month'] = Attendance.objects.filter(
+            employee=manager, 
+            date__year=current_year, 
+            date__month=current_month
+        ).count()
+        context['unread_announcements'] = Announcement.objects.count()
+
+        # Manager stats (team/system)
+        context['total_employees'] = User.objects.filter(role='EMPLOYEE', is_approved=True).count()
+        context['on_leave_today'] = Leave.objects.filter(start_date__lte=today, end_date__gte=today, status='APPROVED').count()
+        context['pending_leave_approvals'] = Leave.objects.filter(status='PENDING').count()
         context['present_today'] = Attendance.objects.filter(date=today, clock_in__isnull=False).count()
         context['total_announcements'] = Announcement.objects.count()
         context['approved_leave_month'] = Leave.objects.filter(status='APPROVED', start_date__year=current_year, start_date__month=current_month).count()
@@ -220,20 +273,35 @@ class NotApprovedView(TemplateView):
         return context
 
 # --- Admin Employee Management ---
-class AdminEmployeeListView(AdminRequiredMixin, ListView):
+class AdminEmployeeListView(ManagerRequiredMixin, ListView):
     model = User
     template_name = 'admin_view_employees.html'
     context_object_name = 'employees'
     paginate_by = 15
     ordering = ['-id']  # Newest first
 
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_view_employees.html', 'admin_view_employees.html']
+        return ['admin_view_employees.html']
+
     def get_queryset(self):
         return User.objects.filter(role='EMPLOYEE').order_by('-id')
 
-class AdminAddEmployeeView(AdminRequiredMixin, CreateView):
+class AdminAddEmployeeView(ManagerRequiredMixin, CreateView):
     form_class = EmployeeSignUpForm
     template_name = 'admin_add_employee.html'
     success_url = reverse_lazy('admin_view_employees')
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_add_employee.html', 'admin_add_employee.html']
+        return ['admin_add_employee.html']
+
+    def get_success_url(self):
+        if 'manager' in self.request.path:
+            return reverse_lazy('manager_view_employees')
+        return reverse_lazy('admin_view_employees')
 
     def form_valid(self, form):
         """Handle successful form submission."""
@@ -263,7 +331,7 @@ class AdminAddEmployeeView(AdminRequiredMixin, CreateView):
         )
         return super().form_invalid(form)
     
-class AdminEmployeeUpdateView(AdminRequiredMixin, UpdateView):
+class AdminEmployeeUpdateView(ManagerRequiredMixin, UpdateView):
     model = User
     form_class = EmployeeUpdateForm
     template_name = 'admin_edit_employee.html'
@@ -271,7 +339,7 @@ class AdminEmployeeUpdateView(AdminRequiredMixin, UpdateView):
 
 @login_required
 def approve_employee(request, pk):
-    if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+    if not request.user.has_manager_permissions():
         return redirect('employee_dashboard')
     employee = get_object_or_404(User, pk=pk)
     employee.is_approved = True
@@ -280,13 +348,13 @@ def approve_employee(request, pk):
 
 @login_required
 def reject_employee(request, pk):
-    if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+    if not request.user.has_manager_permissions():
         return redirect('employee_dashboard')
     employee = get_object_or_404(User, pk=pk)
     employee.delete()
     return redirect('admin_view_employees')
 
-class AdminEmployeeDeleteView(AdminRequiredMixin, DeleteView):
+class AdminEmployeeDeleteView(ManagerRequiredMixin, DeleteView):
     model = User
     template_name = 'admin_delete_employee.html'
     success_url = reverse_lazy('admin_view_employees')
@@ -323,6 +391,11 @@ class LeaveApplyView(EmployeeRequiredMixin, CreateView):
     template_name = 'leave_apply.html'
     success_url = reverse_lazy('leave_history')
 
+    def get_template_names(self):
+        if self.request.user.role == 'MANAGER':
+            return ['manager_leave_apply.html', 'leave_apply.html']
+        return ['leave_apply.html']
+
     def form_valid(self, form):
         form.instance.employee = self.request.user
         return super().form_valid(form)
@@ -332,16 +405,26 @@ class LeaveHistoryView(EmployeeRequiredMixin, ListView):
     template_name = 'leave_history.html'
     context_object_name = 'leaves'
 
+    def get_template_names(self):
+        if self.request.user.role == 'MANAGER':
+            return ['manager_leave_history.html', 'leave_history.html']
+        return ['leave_history.html']
+
     def get_queryset(self):
         return Leave.objects.filter(employee=self.request.user)
 
 # --- Admin Leave Management ---
-class AdminLeaveManageView(AdminRequiredMixin, ListView):
+class AdminLeaveManageView(ManagerRequiredMixin, ListView):
     model = Leave
     template_name = 'admin_manage_leaves.html'
     context_object_name = 'leaves'
     paginate_by = 15
     ordering = ['-id']  # Newest first (by ID, which is auto-incrementing)
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_manage_leaves.html', 'admin_manage_leaves.html']
+        return ['admin_manage_leaves.html']
     
     def get_queryset(self):
         queryset = Leave.objects.select_related('employee').order_by('-id')
@@ -403,7 +486,7 @@ class AdminLeaveManageView(AdminRequiredMixin, ListView):
 
 @login_required
 def approve_leave(request, pk):
-    if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+    if not request.user.has_manager_permissions():
         return redirect('employee_dashboard')
     leave = get_object_or_404(Leave, pk=pk)
     leave.status = 'APPROVED'
@@ -412,7 +495,7 @@ def approve_leave(request, pk):
 
 @login_required
 def reject_leave(request, pk):
-    if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+    if not request.user.has_manager_permissions():
         return redirect('employee_dashboard')
     leave = get_object_or_404(Leave, pk=pk)
     leave.status = 'REJECTED'
@@ -421,12 +504,17 @@ def reject_leave(request, pk):
 
 
 # --- Payroll Management ---
-class AdminPayrollListView(AdminRequiredMixin, ListView):
+class AdminPayrollListView(ManagerRequiredMixin, ListView):
     model = Payroll
     template_name = 'admin_manage_payroll.html'
     context_object_name = 'payrolls'
     paginate_by = 15
     ordering = ['-id']
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_manage_payroll.html', 'admin_manage_payroll.html']
+        return ['admin_manage_payroll.html']
     
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -488,11 +576,22 @@ class AdminPayrollListView(AdminRequiredMixin, ListView):
         
         return context
 
-class CreatePayrollView(AdminRequiredMixin, CreateView):
+class CreatePayrollView(ManagerRequiredMixin, CreateView):
     model = Payroll
     form_class = PayrollForm
     template_name = 'admin_create_payroll.html'
     success_url = reverse_lazy('admin_manage_payroll')
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_create_payroll.html', 'admin_create_payroll.html']
+        return ['admin_create_payroll.html']
+
+    def get_success_url(self):
+        if 'manager' in self.request.path:
+            return reverse_lazy('manager_manage_payroll')
+        return reverse_lazy('admin_manage_payroll')
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.fields['employee'].queryset = User.objects.filter(role='EMPLOYEE', is_approved=True)
@@ -500,7 +599,7 @@ class CreatePayrollView(AdminRequiredMixin, CreateView):
 
 @login_required
 def process_payroll(request, pk):
-    if not (request.user.is_superuser or request.user.role == 'ADMIN'):
+    if not request.user.has_manager_permissions():
         return redirect('employee_dashboard')
     payroll = get_object_or_404(Payroll, pk=pk)
     payroll.status = 'PAID'
@@ -512,12 +611,17 @@ class EmployeePayslipListView(EmployeeRequiredMixin, ListView):
     template_name = 'employee_payslips.html'
     context_object_name = 'payslips'
 
+    def get_template_names(self):
+        if self.request.user.role == 'MANAGER':
+            return ['manager_employee_payslips.html', 'employee_payslips.html']
+        return ['employee_payslips.html']
+
     def get_queryset(self):
         return Payroll.objects.filter(employee=self.request.user)
     
 @login_required
 def payslip_pdf_view(request, pk):
-    if not request.user.role == 'EMPLOYEE':
+    if not (request.user.role == 'EMPLOYEE' or request.user.role == 'MANAGER'):
         return redirect('admin_dashboard')
     payslip = get_object_or_404(Payroll, pk=pk, employee=request.user)
     template_path = 'payslip_pdf.html'
@@ -541,11 +645,13 @@ def payslip_pdf_view(request, pk):
 # --- Attendance Management ---
 @login_required
 def clock_in(request):
-    if not request.user.role == 'EMPLOYEE':
+    if not (request.user.role == 'EMPLOYEE' or request.user.role == 'MANAGER'):
         return redirect('admin_dashboard')
     # Check if the employee has already clocked in today
     if Attendance.objects.filter(employee=request.user, date=timezone.now().date()).exists():
         messages.error(request, 'You have already clocked in today.')
+        if request.user.role == 'MANAGER':
+            return redirect('employee_attendance')
         return redirect('employee_attendance')
 
     Attendance.objects.create(
@@ -558,7 +664,7 @@ def clock_in(request):
 
 @login_required
 def clock_out(request):
-    if not request.user.role == 'EMPLOYEE':
+    if not (request.user.role == 'EMPLOYEE' or request.user.role == 'MANAGER'):
         return redirect('admin_dashboard')
     try:
         attendance = Attendance.objects.get(employee=request.user, date=timezone.now().date())
@@ -578,15 +684,25 @@ class EmployeeAttendanceView(EmployeeRequiredMixin, ListView):
     template_name = 'employee_attendance.html'
     context_object_name = 'attendance_records'
 
+    def get_template_names(self):
+        if self.request.user.role == 'MANAGER':
+            return ['manager_employee_attendance.html', 'employee_attendance.html']
+        return ['employee_attendance.html']
+
     def get_queryset(self):
         return Attendance.objects.filter(employee=self.request.user)
 
-class AdminManageAttendanceView(AdminRequiredMixin, ListView):
+class AdminManageAttendanceView(ManagerRequiredMixin, ListView):
     model = Attendance
     template_name = 'admin_manage_attendance.html'
     context_object_name = 'attendance_records'
     paginate_by = 15
     ordering = ['-date', '-clock_in']
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_manage_attendance.html', 'admin_manage_attendance.html']
+        return ['admin_manage_attendance.html']
     
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -653,35 +769,61 @@ class AdminManageAttendanceView(AdminRequiredMixin, ListView):
         
         return context
 
-class AdminAddAttendanceView(AdminRequiredMixin, CreateView):
+class AdminAddAttendanceView(ManagerRequiredMixin, CreateView):
     model = Attendance
     form_class = AttendanceForm
     template_name = 'admin_add_attendance.html'
     success_url = reverse_lazy('admin_manage_attendance')
+
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_add_attendance.html', 'admin_add_attendance.html']
+        return ['admin_add_attendance.html']
+
+    def get_success_url(self):
+        if 'manager' in self.request.path:
+            return reverse_lazy('manager_manage_attendance')
+        return reverse_lazy('admin_manage_attendance')
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.fields['employee'].queryset = User.objects.filter(role='EMPLOYEE', is_approved=True)
         return form
 
 # --- Announcement Management ---
-class AdminAnnouncementListView(AdminRequiredMixin, ListView):
+class AdminAnnouncementListView(ManagerRequiredMixin, ListView):
     model = Announcement
     template_name = 'admin_view_announcements.html'
     context_object_name = 'announcements'
 
-class AdminAddAnnouncementView(AdminRequiredMixin, CreateView):
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_view_announcements.html', 'admin_view_announcements.html']
+        return ['admin_view_announcements.html']
+
+class AdminAddAnnouncementView(ManagerRequiredMixin, CreateView):
     model = Announcement
     form_class = AnnouncementForm
     template_name = 'admin_add_announcement.html'
     success_url = reverse_lazy('admin_view_announcements')
 
-class AdminAnnouncementUpdateView(AdminRequiredMixin, UpdateView):
+    def get_template_names(self):
+        if 'manager' in self.request.path:
+            return ['manager_admin_add_announcement.html', 'admin_add_announcement.html']
+        return ['admin_add_announcement.html']
+
+    def get_success_url(self):
+        if 'manager' in self.request.path:
+            return reverse_lazy('manager_view_announcements')
+        return reverse_lazy('admin_view_announcements')
+
+class AdminAnnouncementUpdateView(ManagerRequiredMixin, UpdateView):
     model = Announcement
     form_class = AnnouncementForm
     template_name = 'admin_edit_announcement.html'
     success_url = reverse_lazy('admin_view_announcements')
 
-class AdminAnnouncementDeleteView(AdminRequiredMixin, DeleteView):
+class AdminAnnouncementDeleteView(ManagerRequiredMixin, DeleteView):
     model = Announcement
     template_name = 'admin_delete_announcement.html'
     success_url = reverse_lazy('admin_view_announcements')
@@ -692,3 +834,8 @@ class EmployeeAnnouncementListView(EmployeeRequiredMixin, ListView):
     context_object_name = 'announcements'
     ordering = ['-created_at']
     paginate_by = 10
+
+    def get_template_names(self):
+        if self.request.user.role == 'MANAGER':
+            return ['manager_employee_view_announcements.html', 'employee_view_announcements.html']
+        return ['employee_view_announcements.html']
